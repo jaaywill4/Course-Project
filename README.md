@@ -1,2 +1,1 @@
-# Course-Project
-my course project
+# Improving Scalability and Load Balancing of a Containerized Cloud Application
