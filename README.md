@@ -1,4 +1,4 @@
-# Course_Project
+# Improving Scalability and Load Balancing of a Containerized Cloud Application
 
 ## Vision
 This project demonstrates a two-component containerized application using Infrastructure as Code principles.
