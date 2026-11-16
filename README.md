@@ -122,3 +122,78 @@ Docker Compose automatically creates a network and connects the services.
 - Implement authentication
 - Deploy using CI/CD pipeline
 - Add container security features (non-root user, resource limits)
+
+## Milestone 2 — Kubernetes Core Implementation
+
+### Overview
+
+For Milestone 2, I moved my Node.js visitor counter application from Docker Compose to a Kubernetes cluster running on FABRIC. The goal was to improve scalability and reliability by using Kubernetes Deployments, Services, and multiple application replicas.
+
+### Kubernetes Architecture
+
+The application uses three main components:
+
+- **Nginx:** Receives incoming HTTP requests and forwards them to the Node.js Service.
+- **Node.js:** Runs three replicas of my visitor counter application.
+- **Redis:** Stores the visitor count shared by all three Node.js replicas.
+
+I used ClusterIP Services for internal communication and a NodePort Service to expose Nginx on port 30081.
+
+### Deployment Instructions
+
+The Kubernetes configuration files are organized into three folders: `configmaps/`, `deployments/`, and `services/`.
+
+To deploy the application, run these commands from the project directory on a machine configured to access the Kubernetes cluster:
+
+```bash
+kubectl apply -f configmaps/
+kubectl apply -f deployments/
+kubectl apply -f services/
+```
+
+To verify the deployment:
+
+```bash
+kubectl get deploy,pods,svc
+```
+
+### Accessing the Application
+
+The application can be accessed through the Nginx NodePort Service on port 30081.
+
+For testing from FABRIC node1, I used:
+
+```bash
+curl http://192.168.1.1:30081
+```
+
+The application returned the visitor count, which increased with each request.
+
+### Scaling Test
+
+I tested scaling by increasing the Node.js Deployment from three replicas to five.
+
+```bash
+kubectl scale deployment course-project-nodejs --replicas=5
+kubectl get pods -l app=course-project-nodejs
+```
+
+All five Pods reached `2/2 Running`. After testing, I scaled the Deployment back to three replicas.
+
+### Self-Healing Test
+
+I manually deleted one Node.js Pod to test Kubernetes self-healing. Kubernetes automatically created a replacement Pod, and the Deployment returned to three running replicas.
+
+### Multi-Container Pod
+
+Each Node.js Pod contains two containers: the Node.js application and a BusyBox logging sidecar.
+
+The sidecar prints a status message every ten seconds. I added it to demonstrate how multiple containers can run together inside the same Pod. It currently provides basic status logging rather than collecting application access logs.
+
+### Persistence
+
+Redis currently uses temporary storage through an `emptyDir` volume. Persistent storage will be added in Milestone 3.
+
+### Milestone 2 Results
+
+I successfully deployed the application on Kubernetes, tested communication between Nginx, Node.js, and Redis, scaled the application from three to five replicas, verified automatic Pod replacement, and confirmed that the sidecar generated logs.
